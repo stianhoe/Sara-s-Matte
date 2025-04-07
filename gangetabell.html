@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawaii Banan Gangetabell!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        /* Kawaii Banan Tema (samme som før, med tillegg) */
+        :root {
+            --banana-yellow: #FFDA63;
+            --banana-peel: #A1887F;
+            --banana-dark: #795548;
+            --kawaii-pink: #FFC0CB;
+            --kawaii-accent: #FF80AB;
+            --bg-light: #FFF8E1;
+            --text-dark: #5D4037;
+            --button-blue: #82B1FF;
+            --correct-green: #8BC34A;
+            --incorrect-red: #FF8A80;
+            --life-color: #FF5252; /* Rød for liv */
+        }
+
+        body {
+            font-family: 'Fredoka One', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Endret for å se toppen */
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-light) 0%, var(--banana-yellow) 100%);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        #game-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 25px 35px;
+            border-radius: 25px;
+            border: 3px solid var(--banana-dark);
+            box-shadow: 5px 5px 0px var(--banana-dark);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            margin-top: 20px;
+            position: relative; /* Viktig for overlay */
+            overflow: hidden; /* Hindre innhold i å gå utenfor ved animasjoner */
+        }
+
+        /* -- Spill-elementer (ligner forrige versjon) -- */
+        h1 { color: var(--banana-dark); margin-bottom: 10px; font-size: 2.3em; text-shadow: 2px 2px 0px var(--kawaii-pink); }
+        h1 .banana-icon { display: inline-block; transform: rotate(-15deg); font-size: 1.2em; margin-left: 5px; }
+
+        #stats-area { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px 15px; margin-bottom: 20px; padding: 10px; background-color: rgba(255, 255, 255, 0.7); border-radius: 15px; border: 2px dashed var(--banana-peel); font-size: 1.0em;}
+        .stat-item strong { color: var(--banana-dark); }
+        #lives-display .life-icon { color: var(--life-color); margin: 0 2px; font-size: 1.2em; transition: transform 0.3s ease; }
+        #lives-display .life-icon.lost { transform: scale(0.5) rotate(-30deg); opacity: 0.5; }
+
+
+        #question-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; gap: 15px; }
+        #question { font-size: 2.5em; color: var(--text-dark); padding: 10px 20px; background-color: var(--banana-yellow); border-radius: 15px; display: inline-block; min-width: 180px; border: 2px solid var(--banana-dark); }
+        #visual-aid-container { width: 100%; max-width: 350px; margin: 0 auto; }
+        #visual-aid { display: grid; gap: 5px; justify-content: center; padding: 10px; background-color: var(--bg-light); border-radius: 10px; border: 2px dotted var(--banana-peel); min-height: 50px; }
+        .visual-item { width: 16px; height: 16px; background-color: var(--banana-yellow); border-radius: 5px; border: 1px solid var(--banana-peel); transition: transform 0.2s ease; }
+         #visual-aid:hover .visual-item { transform: scale(1.2) rotate(10deg); }
+
+        #answer-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .answer-button { /* ... (samme som før) ... */
+            padding: 15px 10px; font-size: 1.5em; font-family: 'Fredoka One', cursive;
+            background-color: var(--button-blue); color: white; border: none;
+            border-radius: 12px; cursor: pointer;
+            border-bottom: 4px solid #4285F4;
+            transition: all 0.1s ease-in-out;
+        }
+        .answer-button:hover:not(:disabled) { background-color: #64B5F6; transform: translateY(-2px); border-bottom-width: 6px; }
+        .answer-button:active:not(:disabled) { transform: translateY(1px); border-bottom-width: 3px; }
+        .answer-button:disabled { cursor: not-allowed; opacity: 0.6; background-color: #BDBDBD; border-bottom-color: #757575; }
+        .correct-choice { background-color: var(--correct-green) !important; border-bottom-color: #689F38 !important; animation: bounceCorrect 0.5s; }
+        .incorrect-choice { background-color: var(--incorrect-red) !important; border-bottom-color: #D32F2F !important; }
+        @keyframes bounceCorrect { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        #alternative-view-button { /* ... (samme som før) ... */
+            padding: 10px 18px; font-size: 1em; font-family: 'Fredoka One', cursive;
+            background-color: var(--kawaii-pink); color: var(--text-dark); border: none;
+            border-radius: 10px; cursor: pointer; border-bottom: 3px solid var(--kawaii-accent);
+            transition: all 0.1s ease-in-out; margin-bottom: 15px;
+        }
+        #alternative-view-button:hover:not(:disabled) { background-color: #FF80AB; transform: translateY(-1px); border-bottom-width: 4px;}
+        #alternative-view-button:active:not(:disabled) { transform: translateY(1px); border-bottom-width: 2px; }
+        #alternative-view-button:disabled { background-color: #E0E0E0; cursor: not-allowed; border-bottom-color: #9E9E9E;}
+
+        #alternative-explanation { /* ... (samme som før) ... */
+            margin-top: 10px; padding: 15px; background-color: rgba(255, 255, 255, 0.8);
+            border: 2px dashed var(--banana-peel); border-radius: 15px; min-height: 60px;
+            text-align: left; font-size: 0.95em; line-height: 1.5; color: var(--text-dark);
+        }
+        #alternative-explanation strong { color: var(--kawaii-accent); }
+
+        #feedback { margin-top: 15px; font-size: 1.3em; font-weight: normal; min-height: 40px; line-height: 1.4; color: var(--text-dark); }
+        .feedback-correct { color: var(--correct-green); font-weight: bold; }
+        .feedback-incorrect { color: var(--incorrect-red); font-weight: bold; }
+
+        #reward-message { /* ... (samme som før) ... */
+             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+             background-color: rgba(255, 192, 203, 0.95); color: var(--banana-dark);
+             padding: 20px 30px; border-radius: 20px; font-size: 1.8em; border: 3px solid var(--banana-dark);
+             box-shadow: 0 0 15px rgba(255, 128, 171, 0.7); z-index: 10;
+             transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); white-space: nowrap;
+        }
+        #reward-message.show { transform: translate(-50%, -50%) scale(1); }
+
+        /* -- Game Over Overlay -- */
+        #game-over-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Mørk overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Start usynlig */
+            visibility: hidden; /* Start skjult */
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 20;
+            border-radius: 22px; /* Match container */
+        }
+        #game-over-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        #game-over-content {
+            background-color: var(--bg-light);
+            padding: 30px 40px;
+            border-radius: 20px;
+            border: 3px solid var(--banana-dark);
+            box-shadow: 4px 4px 0px var(--banana-peel);
+            text-align: center;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto; /* Scroll hvis innholdet er for høyt */
+        }
+        #game-over-content h2 {
+            color: var(--banana-dark);
+            font-size: 2em;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0px var(--kawaii-pink);
+        }
+        #game-over-content p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        /* High Score Liste */
+        #highscore-list {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+            max-height: 150px; /* Begrens høyde, tillat scroll */
+            overflow-y: auto;
+            border: 1px solid var(--banana-peel);
+            border-radius: 10px;
+            background-color: rgba(255,255,255,0.5);
+        }
+        #highscore-list li {
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-bottom: 1px dotted var(--banana-peel);
+            display: flex;
+            justify-content: space-between;
+        }
+         #highscore-list li:last-child {
+             border-bottom: none;
+         }
+        #highscore-list li .rank { font-weight: bold; color: var(--kawaii-accent); margin-right: 10px;}
+        #highscore-list li .score { font-weight: bold; color: var(--banana-dark); }
+
+
+        /* Navn Input */
+        #name-input-area {
+            margin-bottom: 20px;
+        }
+        #name-input {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            font-family: 'Fredoka One', cursive;
+            border: 2px solid var(--banana-peel);
+            border-radius: 10px;
+            margin-right: 10px;
+            width: 150px;
+        }
+        #submit-score-button {
+             padding: 10px 15px; font-size: 1em; font-family: 'Fredoka One', cursive;
+             background-color: var(--correct-green); color: white; border: none;
+             border-radius: 10px; cursor: pointer; border-bottom: 3px solid #689F38;
+             transition: all 0.1s ease-in-out;
+        }
+         #submit-score-button:hover { background-color: #9CCC65; }
+
+
+        #play-again-button {
+            padding: 12px 25px; font-size: 1.2em; font-family: 'Fredoka One', cursive;
+            background-color: var(--button-blue); color: white; border: none;
+            border-radius: 12px; cursor: pointer; border-bottom: 4px solid #4285F4;
+            transition: all 0.1s ease-in-out; display: block; margin: 20px auto 0;
+        }
+         #play-again-button:hover { background-color: #64B5F6; transform: translateY(-2px); border-bottom-width: 6px;}
+
+
+        /* Hjelpeklasse */
+        .hidden { display: none !important; }
+
+        /* Responsivitet (justeringer) */
+        @media (max-width: 650px) {
+             #stats-area { font-size: 0.9em; }
+             #game-over-content { padding: 20px; }
+             #game-over-content h2 { font-size: 1.8em; }
+             #game-over-content p { font-size: 1.1em; }
+             #highscore-list li { font-size: 1em; padding: 6px 10px;}
+             #name-input { width: 120px; font-size: 1em; padding: 8px 10px;}
+             #submit-score-button, #play-again-button { font-size: 1em; padding: 10px 15px;}
+        }
+
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 15px; left: 15px; z-index: 5;">
+        <a href="index.html" style="text-decoration: none; color: var(--text-dark); background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 8px; font-size: 0.9em; border: 1px solid var(--banana-peel);">← Hovedsiden</a>
+    </div>
+    <div id="game-container">
+        <!-- Spill-innhold (som før) -->
+        <h1><span class="banana-icon">🍌</span> Kawaii Banan Gangetabell!</h1>
+        <div id="stats-area">
+            <div class="stat-item">Level: <strong id="level-value">1</strong></div>
+            <div class="stat-item">Poeng: <strong id="score-value">0</strong></div>
+            <div class="stat-item">Liv: <strong id="lives-display"></strong></div>
+            <div class="stat-item">High Score: <strong id="highscore-value">0</strong></div>
+        </div>
+        <div id="question-area">
+            <div id="visual-aid-container"><div id="visual-aid"></div></div>
+            <div id="question">? x ? = ?</div>
+        </div>
+        <div id="answer-options"></div>
+        <button id="alternative-view-button">Vis en annen måte?</button>
+        <div id="alternative-explanation">Trykk på den rosa knappen for flere hint!</div>
+        <div id="feedback">Velg riktig svar!</div>
+        <div id="reward-message"></div>
+
+        <!-- Game Over Overlay -->
+        <div id="game-over-overlay">
+            <div id="game-over-content">
+                <h2>Game Over! <span class="banana-icon">😵</span></h2>
+                <p>Din poengsum ble: <strong id="final-score">0</strong></p>
+                <h3>Topp Bananer:</h3>
+                <ol id="highscore-list"></ol>
+                <div id="name-input-area" class="hidden">
+                    <p>Du klarte det! Skriv inn navnet ditt:</p>
+                    <input type="text" id="name-input" maxlength="10" placeholder="Navn">
+                    <button id="submit-score-button">Lagre</button>
+                </div>
+                 <button id="play-again-button">Spill Igjen?</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Referanser (utvidet)
+        const questionElement = document.getElementById('question');
+        const visualAidElement = document.getElementById('visual-aid');
+        const answerOptionsElement = document.getElementById('answer-options');
+        const altViewButton = document.getElementById('alternative-view-button');
+        const altExplanationElement = document.getElementById('alternative-explanation');
+        const feedbackElement = document.getElementById('feedback');
+        const scoreValueElement = document.getElementById('score-value');
+        const levelValueElement = document.getElementById('level-value');
+        const livesDisplayElement = document.getElementById('lives-display'); // Ny
+        const highscoreValueElement = document.getElementById('highscore-value'); // Viser personlig high score
+        const rewardMessageElement = document.getElementById('reward-message');
+        const gameOverOverlay = document.getElementById('game-over-overlay'); // Ny
+        const gameOverContent = document.getElementById('game-over-content'); // Ny
+        const finalScoreElement = document.getElementById('final-score'); // Ny
+        const highscoreListElement = document.getElementById('highscore-list'); // Ny
+        const nameInputArea = document.getElementById('name-input-area'); // Ny
+        const nameInput = document.getElementById('name-input'); // Ny
+        const submitScoreButton = document.getElementById('submit-score-button'); // Ny
+        const playAgainButton = document.getElementById('play-again-button'); // Ny
+
+        // Spillvariabler & Systemer
+        let currentNum1, currentNum2, correctAnswer;
+        let score = 0;
+        let level = 1;
+        let personalHighScore = 0; // Spillerens egen beste
+        let lives = 3; // Ny
+        const initialLives = 3;
+        let isGameOver = false; // Ny
+
+        // Leveling (samme som før)
+        const pointsPerLevelBase = 5;
+        let pointsNeededForNextLevel = pointsPerLevelBase;
+        let currentLevelPoints = 0;
+
+        // High Score Liste
+        let highScores = []; // Array of { name: "...", score: ... }
+        const maxHighScores = 5; // Vis topp 5
+
+        // Andre variabler (samme som før)
+        const maxNumber = 10;
+        const numberOfOptions = 4;
+        let currentExplanationIndex = -1;
+        let explanationMethods = [];
+        const levelRewards = { 2: "Moden Banan! 🍌", 3: "Suuuper Banan! ✨", 5: "Gangemester-Banan! 😎", 7: "Banana Split! 🍨", 10: "Kong Banan! 👑🍌", 15: "Galaktisk Banan! 🚀🌌", 20: "Uendelig Banan Power! ∞" };
+
+
+        // --- Hjelpefunksjoner (Shuffle, Distractors, Forklaringer - uendret) ---
+         function shuffleArray(array) { /* ... */ for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
+         function generateDistractors(correct, num1, num2) { /* ... */ const d=new Set();d.add(correct);const m=[(c)=>c+Math.ceil(Math.random()*2)+1,(c)=>c-Math.ceil(Math.random()*2)-1,(c,n1,n2)=>(n1+1)*n2,(c,n1,n2)=>n1*(n2+1),(c,n1,n2)=>(n1-1)*n2,(c,n1,n2)=>n1*(n2-1),(c)=>c+10,(c)=>Math.max(1,c-10)];while(d.size<numberOfOptions+2){const r=m[Math.floor(Math.random()*m.length)];let i=r(correct,num1,num2);if(i>0&&i!==correct&&!d.has(i)){d.add(i);}} d.delete(correct);return Array.from(d).slice(0,numberOfOptions-1); }
+         function getRepeatedAdditionHTML(n1, n2) { /* ... */ let s=Math.min(n1,n2),l=Math.max(n1,n2),a=Array(s).fill(l).join(' + '); return `<strong>Gjentatt Addisjon:</strong><br>${n1} x ${n2} er ${l} lagt sammen ${s} ganger:<br>${a} = ${n1*n2}`; }
+         function getGroupingHTML(n1, n2) { /* ... */ let g=Math.min(n1,n2),i=Math.max(n1,n2); return `<strong>Gruppering:</strong><br>Se for deg <strong>${g} grupper</strong> med <strong>${i}</strong> i hver. Total: ${n1*n2}.`; }
+         function getNumberLineHTML(n1, n2) { /* ... */ let j=n1,z=n2,p='0'; if(n2<n1){j=n2;z=n1;} for(let i=1;i<=j;i++){p+=` → ${i*z}`;} return `<strong>Tallinje:</strong><br>Start på 0. Gjør <strong>${j} hopp</strong> på <strong>${z}</strong>:<br>${p}`; }
+         function getCommutativeHTML(n1, n2) { /* ... */ if(n1===n2)return null; return `<strong>Bytte Plass:</strong><br>Husk: <strong>${n1} x ${n2}</strong> er lik <strong>${n2} x ${n1}</strong> (${n1*n2}).`; }
+         function getNearTenHTML(n1, n2) { /* ... */ let t=-1,o=-1; if(n1===9){t=9;o=n2;}else if(n2===9){t=9;o=n1;} if(t===9){return `<strong>Nær 10 (9-gangen):</strong><br>Tenk ${10}x${o}=${10*o}, trekk fra ${o}.<br>${10*o} - ${o} = ${9*o}.`;} return null; }
+
+        // --- Kjernefunksjoner (Oppdatert) ---
+        function displayVisualAid(rows, cols) { /* ... (uendret) ... */
+            visualAidElement.innerHTML = ''; visualAidElement.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+            const t=rows*cols; const l=100; if(t>l){visualAidElement.innerHTML=`<small style="grid-column: 1 / -1;">(${t} er for mange!)🍌</small>`; visualAidElement.style.gridTemplateColumns = '1fr'; return;}
+            for(let i=0;i<t;i++){const e=document.createElement('div');e.classList.add('visual-item');visualAidElement.appendChild(e);}
+        }
+
+        function updateLivesDisplay() {
+             livesDisplayElement.innerHTML = ''; // Tøm
+             for (let i = 0; i < initialLives; i++) {
+                 const lifeIcon = document.createElement('span');
+                 lifeIcon.classList.add('life-icon');
+                 lifeIcon.textContent = '🍌'; // Bruk banan som liv!
+                 if (i >= lives) {
+                     lifeIcon.classList.add('lost'); // Legg til 'lost' klasse hvis livet er mistet
+                 }
+                 livesDisplayElement.appendChild(lifeIcon);
+             }
+        }
+
+        function updateStatsDisplay() {
+            scoreValueElement.textContent = score;
+            levelValueElement.textContent = level;
+            highscoreValueElement.textContent = personalHighScore; // Viser spillerens egen beste
+            updateLivesDisplay(); // Oppdater livs-ikonene
+        }
+
+        function showReward(levelNum) { /* ... (uendret) ... */
+            const r = levelRewards[levelNum]; if(r){rewardMessageElement.textContent = `Level ${levelNum}! ${r}`; rewardMessageElement.classList.add('show'); setTimeout(() => { rewardMessageElement.classList.remove('show'); }, 2500); }
+        }
+
+        // --- High Score Funksjoner ---
+        function loadHighScores() {
+            const storedScores = localStorage.getItem('bananaHighScores');
+            highScores = storedScores ? JSON.parse(storedScores) : [];
+            // Last også personlig high score
+            const storedPersonalHighScore = localStorage.getItem('bananaPersonalHighScore');
+             personalHighScore = storedPersonalHighScore ? parseInt(storedPersonalHighScore, 10) : 0;
+        }
+
+        function saveHighScores() {
+            localStorage.setItem('bananaHighScores', JSON.stringify(highScores));
+            localStorage.setItem('bananaPersonalHighScore', personalHighScore);
+        }
+
+        function isHighScore(newScore) {
+             if (highScores.length < maxHighScores) {
+                 return true; // Alltid plass hvis listen ikke er full
+             }
+             // Sjekk om den nye scoren er høyere enn den laveste på listen
+             return newScore > highScores[highScores.length - 1].score;
+        }
+
+        function addHighScore(name, score) {
+             const newEntry = { name: name || "Banan Ven", score: score }; // Standard navn hvis tomt
+             highScores.push(newEntry);
+             // Sorter listen synkende etter score
+             highScores.sort((a, b) => b.score - a.score);
+             // Kutt listen til maks lengde
+             highScores = highScores.slice(0, maxHighScores);
+             saveHighScores(); // Lagre den oppdaterte listen
+        }
+
+         function displayHighScores() {
+             highscoreListElement.innerHTML = ''; // Tøm listen
+             if (highScores.length === 0) {
+                  highscoreListElement.innerHTML = '<li>Ingen toppbananer ennå!</li>';
+                  return;
+             }
+             highScores.forEach((entry, index) => {
+                 const li = document.createElement('li');
+                 li.innerHTML = `<span class="rank">${index + 1}.</span> ${entry.name} <span class="score">${entry.score} poeng</span>`;
+                 highscoreListElement.appendChild(li);
+             });
+         }
+
+         // --- Game Over Funksjon ---
+         function gameOver() {
+             isGameOver = true;
+             // Deaktiver gjenværende knapper etc.
+             altViewButton.disabled = true;
+             answerOptionsElement.querySelectorAll('.answer-button').forEach(btn => btn.disabled = true);
+
+             finalScoreElement.textContent = score; // Vis endelig score
+             displayHighScores(); // Vis high score listen
+
+             // Sjekk om spilleren kom på listen
+             if (isHighScore(score)) {
+                 nameInputArea.classList.remove('hidden'); // Vis navnefeltet
+                 nameInput.value = ''; // Tøm feltet
+                 submitScoreButton.disabled = false; // Aktiver lagreknapp
+                 nameInput.focus();
+             } else {
+                 nameInputArea.classList.add('hidden'); // Skjul navnefeltet
+             }
+
+             gameOverOverlay.classList.add('show'); // Vis Game Over skjermen
+         }
+
+
+        function generateQuestion() {
+            if (isGameOver) return; // Ikke generer nytt spørsmål hvis spillet er over
+
+            // ... (Resten av genereringslogikken som før) ...
+            currentNum1 = Math.floor(Math.random() * maxNumber) + 1;
+            currentNum2 = Math.floor(Math.random() * maxNumber) + 1;
+            correctAnswer = currentNum1 * currentNum2;
+            questionElement.textContent = `${currentNum1} x ${currentNum2} = ?`;
+            displayVisualAid(currentNum1, currentNum2);
+            const distractors = generateDistractors(correctAnswer, currentNum1, currentNum2);
+            let options=[correctAnswer,...distractors];const u=Array.from(new Set(options)).filter(o=>o>0);while(u.length<numberOfOptions){let f=correctAnswer+(u.length%2===0?u.length:-u.length)*2+1;if(f>0&&!u.includes(f)){u.push(f);}else{u.push(Math.max(1,correctAnswer+u.length*3+1));}} options=u.slice(0,numberOfOptions);const s=shuffleArray(options);
+            answerOptionsElement.innerHTML='';feedbackElement.textContent='Velg riktig banan-svar!';feedbackElement.className='';altExplanationElement.innerHTML='Trykk på den rosa knappen for flere hint!';
+            s.forEach(o=>{const b=document.createElement('button');b.classList.add('answer-button');b.textContent=o;b.dataset.value=o;b.addEventListener('click',handleAnswerClick);answerOptionsElement.appendChild(b);});
+            explanationMethods=[getRepeatedAdditionHTML,getGroupingHTML,getNumberLineHTML,getCommutativeHTML,getNearTenHTML].map(f=>f(currentNum1,currentNum2)).filter(r=>r!==null);currentExplanationIndex=-1;altViewButton.disabled=explanationMethods.length===0;
+
+            updateStatsDisplay(); // Oppdater stats
+        }
+
+
+        function handleAnswerClick(event) {
+            if (isGameOver) return; // Ikke gjør noe hvis spillet er over
+
+            const selectedButton = event.target;
+            const selectedAnswer = parseInt(selectedButton.dataset.value);
+
+            // Deaktiver knapper midlertidig
+            const allButtons = answerOptionsElement.querySelectorAll('.answer-button');
+            allButtons.forEach(btn => btn.disabled = true);
+            altViewButton.disabled = true;
+
+            if (selectedAnswer === correctAnswer) {
+                // RIKTIG SVAR
+                feedbackElement.textContent = `Yay! Riktig! 🍌`;
+                feedbackElement.className = 'feedback-correct';
+                selectedButton.classList.add('correct-choice');
+
+                score++;
+                currentLevelPoints++;
+                // Sjekk og oppdater personlig high score
+                 if (score > personalHighScore) {
+                     personalHighScore = score;
+                     saveHighScores(); // Lagre også personlig high score
+                 }
+
+                if (currentLevelPoints >= pointsNeededForNextLevel) {
+                    level++;
+                    currentLevelPoints = 0;
+                    pointsNeededForNextLevel = pointsPerLevelBase + level - 1;
+                    showReward(level);
+                }
+                updateStatsDisplay();
+                setTimeout(generateQuestion, 1500);
+
+            } else {
+                // FEIL SVAR
+                lives--; // Mist et liv
+                updateLivesDisplay(); // Oppdater livsikonene umiddelbart
+
+                feedbackElement.textContent = `Oops! Riktig var ${correctAnswer}.`;
+                feedbackElement.className = 'feedback-incorrect';
+                selectedButton.classList.add('incorrect-choice');
+                allButtons.forEach(btn => { if (parseInt(btn.dataset.value) === correctAnswer) { btn.classList.add('correct-choice'); btn.style.animation = 'none'; }});
+
+                if (lives <= 0) {
+                    // Game Over!
+                    setTimeout(gameOver, 1000); // Vent litt før Game Over skjermen vises
+                } else {
+                    // Fortsett spillet
+                    setTimeout(generateQuestion, 2500);
+                }
+            }
+        }
+
+        function showNextExplanation() { /* ... (uendret) ... */
+            if(explanationMethods.length === 0) return; currentExplanationIndex = (currentExplanationIndex + 1) % explanationMethods.length; altExplanationElement.innerHTML = explanationMethods[currentExplanationIndex];
+        }
+
+        function handleNameSubmit() {
+             const name = nameInput.value.trim();
+             addHighScore(name, score); // Legg til scoren i listen
+             displayHighScores(); // Oppdater listen som vises
+             nameInputArea.classList.add('hidden'); // Skjul inputfeltet igjen
+             submitScoreButton.disabled = true; // Deaktiver knappen
+        }
+
+        function restartGame() {
+            gameOverOverlay.classList.remove('show'); // Skjul overlay
+            isGameOver = false;
+            score = 0;
+            level = 1;
+            lives = initialLives;
+            currentLevelPoints = 0;
+            pointsNeededForNextLevel = pointsPerLevelBase;
+             // Ikke last high score på nytt, den er allerede i minnet
+            updateStatsDisplay(); // Oppdater til startverdier
+            generateQuestion(); // Start første runde
+        }
+
+        // --- Initialisering ---
+        function initGame() {
+             loadHighScores(); // Last high scores (både liste og personlig)
+             restartGame(); // Kall restart for å sette opp spillet riktig
+        }
+
+        // --- Event Listeners (utvidet) ---
+        altViewButton.addEventListener('click', showNextExplanation);
+        submitScoreButton.addEventListener('click', handleNameSubmit);
+        playAgainButton.addEventListener('click', restartGame);
+         // Tillat Enter for å lagre navn
+         nameInput.addEventListener('keypress', function(event) {
+             if (event.key === 'Enter' || event.keyCode === 13) {
+                 event.preventDefault(); // Unngå form submit hvis det var en form
+                 handleNameSubmit();
+             }
+         });
+
+        // --- Start Spillet ---
+        initGame();
+
+    </script>
+
+</body>
+</html>

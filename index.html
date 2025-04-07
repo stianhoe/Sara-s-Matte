@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Læringshjørnet!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg-start: #E0F7FA; /* Lys cyan */
+            --main-bg-end: #B2EBF2;   /* Litt mørkere cyan */
+            --card-bg: #FFFFFF;
+            --card-shadow: #00ACC1;  /* Mørk cyan for skygge */
+            --text-dark: #004D40;   /* Veldig mørk cyan/grønn */
+            --accent-color: #FF8A65; /* Korall */
+            --hover-color: #FFAB91; /* Lysere korall */
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif; /* En ren, vennlig font */
+            display: flex;
+            flex-direction: column; /* Tittel over innhold */
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--main-bg-start) 0%, var(--main-bg-end) 100%);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #main-content {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive; /* Samme som spillet for tittel */
+            color: var(--text-dark);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--main-bg-end);
+        }
+         h1 .icon {
+             font-size: 1.1em;
+             vertical-align: middle;
+         }
+
+        p.intro {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #00695C; /* Mørkere tekst for intro */
+        }
+
+        #tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsivt rutenett */
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .tool-link {
+            background-color: var(--card-bg);
+            padding: 25px 20px;
+            border-radius: 15px;
+            border: 2px solid var(--card-shadow);
+            box-shadow: 3px 3px 0px var(--card-shadow);
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tool-link:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 5px 5px 0px var(--card-shadow);
+            background-color: #E0F7FA; /* Litt farge på hover */
+        }
+
+        .tool-link h2 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6em;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        .tool-link h2 .tool-icon {
+             font-size: 1.3em;
+             margin-right: 8px;
+        }
+
+        .tool-link p {
+            font-size: 1em;
+            line-height: 1.5;
+            flex-grow: 1; /* Sørger for at kortene har lik høyde */
+        }
+
+         .tool-link .go-button {
+             margin-top: 15px;
+             padding: 8px 20px;
+             background-color: var(--accent-color);
+             color: white;
+             border-radius: 8px;
+             font-weight: bold;
+             transition: background-color 0.2s ease;
+         }
+         .tool-link:hover .go-button {
+             background-color: var(--hover-color);
+         }
+
+        /* Stil for fremtidige linker */
+        .tool-link.placeholder {
+            background-color: #f0f0f0;
+            border-color: #ccc;
+            box-shadow: 3px 3px 0px #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+         .tool-link.placeholder h2 {
+             color: #999;
+         }
+         .tool-link.placeholder .go-button {
+             background-color: #ccc;
+         }
+
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #00796B;
+        }
+
+        /* Responsivitet */
+         @media (max-width: 600px) {
+             h1 { font-size: 2.2em; }
+             p.intro { font-size: 1.1em; }
+             #main-content { padding: 20px; }
+             .tool-link h2 { font-size: 1.4em; }
+             .tool-link p { font-size: 0.95em; }
+         }
+    </style>
+</head>
+<body>
+
+    <div id="main-content">
+        <h1><span class="icon">🚀</span> Læringshjørnet!</h1>
+        <p class="intro">Velkommen! Her finner du morsomme spill og verktøy for å lære.</p>
+
+        <div id="tool-list">
+            <!-- Link til Gangetabellen -->
+            <a href="gangetabell.html" class="tool-link">
+                <h2><span class="tool-icon">🍌</span>Gange-bananza!</h2>
+                <p>Øv på gangetabellen med et morsomt bananspill, nivåer og high score!</p>
+                <span class="go-button">Start Spillet &rarr;</span>
+            </a>
+
+            <!-- Eksempel på plassholder for fremtidig spill/verktøy -->
+            <div class="tool-link placeholder">
+                 <h2><span class="tool-icon">➕</span>Pluss & Minus?</h2>
+                 <p>Et spill for å øve på addisjon og subtraksjon kommer kanskje snart...</p>
+                 <span class="go-button">Kommer snart</span>
+            </div>
+
+            <!-- Legg til flere linker/plassholdere her etter hvert -->
+             <div class="tool-link placeholder">
+                 <h2><span class="tool-icon">🤔</span>Annet Verktøy</h2>
+                 <p>Kanskje en brøkkalkulator eller et geometri-spill?</p>
+                 <span class="go-button">Kommer snart</span>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Læringshjørnet</p>
+    </footer>
+
+</body>
+</html>
